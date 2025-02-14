@@ -1,2 +1,2 @@
 # MLforHEP
-Machine Learning for High Energy Physics
+Machine Learning Examples for High Energy Physics
