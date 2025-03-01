@@ -76,6 +76,7 @@ print("Accuracy: %.2f%%" % (accuracy * 100.0))
 # (1,1): signal-as-signal -> True positive
 # (1,0): signal-as-background (mis-id) -> False negative
 confmatrix = confusion_matrix(y_test, predictions)
+print('confusion matrix:')
 print(confmatrix)
 # signal efficiency:
 eff_S = confmatrix[1][0]/(confmatrix[1][0] + confmatrix[1][1])
