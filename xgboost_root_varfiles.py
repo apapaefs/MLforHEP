@@ -31,15 +31,19 @@ bkg_factors = 2.0 * btagging**6 # BRs already applied. The k-factor is uniform
 
 # Luminosity (inv fb):
 Lumi = 1000
-# initial numbers of events (before the analysis that created the _var.root files):
+# initial total weight of events (before the analysis that created the _var.root files):
 initial_S = 10000
 initial_B = 864960
+
+# load signal and backgrounds
+# NOTE THAT: the weights will also be multiplied by the total cross section for the process! 
 
 # load signal:
 idS=1 # id number for signal
 xsS=2.8979 # signal cross section
 S, LS, wS = read_ROOT_varfile('./rootdata/HW-7_SM_var.smear.root', idS, xsS)
 Sweight = Lumi * np.sum(wS)/initial_S * sig_factors # calculate total expected number of events
+
 # load background(s):
 idB=0 # id number for background
 xsB=28.328254252903694E3 # background cross section (fb)
