@@ -30,10 +30,10 @@ sig_factors = 2.0 * BR_h_bb**3 * btagging**6
 bkg_factors = 2.0 * btagging**6 # BRs already applied. The k-factor is uniform
 
 # Luminosity (inv fb):
-Lumi = 20000
-# initial numbers of events:
+Lumi = 1000
+# initial numbers of events (before the analysis that created the _var.root files):
 initial_S = 10000
-initial_B = 1E6
+initial_B = 864960
 
 # load signal:
 idS=1 # id number for signal
@@ -82,12 +82,26 @@ print(confmatrix)
 eff_S = confmatrix[1][0]/(confmatrix[1][0] + confmatrix[1][1])
 eff_B = confmatrix[0][0]/(confmatrix[0][0] + confmatrix[0][1])
 
-print('Signal efficiency=', eff_S)
-print('Background Efficiency=', 1-eff_B)
+print('Luminosity=', Lumi)
 
+# initial cross sections into final state:
+print('Initial signal cross section=', xsS*sig_factors*len(S)/initial_S)
+print('Initial background cross section=', xsB*bkg_factors*len(B)/initial_B)
+print('-')
 # calculate "significance"
 print('Initial significance=', Sweight/np.sqrt(Bweight))
+print('-')
+# print analysis efficiencies
+print('Signal efficiency=', eff_S)
+print('Background Efficiency=', 1-eff_B)
+print('Final signal cross section=', xsS*sig_factors*len(S)/initial_S*eff_S)
+print('Final background cross section=', xsB*bkg_factors*len(B)/initial_B*(1-eff_B))
 print('Final significance=', Sweight*eff_S/np.sqrt(Bweight*(1-eff_B)))
+print('-')
+# calculate 95% C.L. limit on expected number of events: 
+S2sigma = np.sqrt(Bweight*(1-eff_B)) * 2
+print('95% C.L. limit on number of signal events=', S2sigma)
+print('95% C.L. limit on signal cross section in given final state=', S2sigma/Lumi, 'fb')
 
 
 # ROC curve:
