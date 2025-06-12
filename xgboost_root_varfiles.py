@@ -30,7 +30,7 @@ sig_factors = 2.0 * BR_h_bb**3 * btagging**6
 bkg_factors = 2.0 * btagging**6 # BRs already applied. The k-factor is uniform
 
 # Luminosity (inv fb):
-Lumi = 1000
+Lumi = 20000
 # initial total weight of events (before the analysis that created the _var.root files):
 initial_S = 10000
 initial_B = 864960
@@ -61,7 +61,7 @@ W = np.array(wS + wB)
 #print(X)
 
 # create testing and training samples:
-X_train, X_test, y_train, y_test, w_train, w_test = train_test_split(X, L, W, test_size=0.8,random_state=seed)
+X_train, X_test, y_train, y_test, w_train, w_test = train_test_split(X, L, W, test_size=0.5,random_state=seed)
 
 # train XGBoost model:
 model = xgb.XGBClassifier()
@@ -77,6 +77,7 @@ accuracy = accuracy_score(y_test, predictions)
 print("Accuracy: %.2f%%" % (accuracy * 100.0))
 
 # Confusion matrix whose i-th row and j-th column entry indicates the number of samples with true label being i-th class and predicted label being j-th class.
+# in this case signal = 1, background = 0
 # in this case:
 # (0,0): background-as-background -> True negative
 # (0,1): background-as-signal (mis-id) -> False positive
@@ -85,9 +86,10 @@ print("Accuracy: %.2f%%" % (accuracy * 100.0))
 confmatrix = confusion_matrix(y_test, predictions)
 print('confusion matrix:')
 print(confmatrix)
-# signal efficiency:
-eff_S = confmatrix[1][0]/(confmatrix[1][0] + confmatrix[1][1])
-eff_B = confmatrix[0][0]/(confmatrix[0][0] + confmatrix[0][1])
+# signal efficiency = number of signal events identified as signal divided by total number of signal events
+eff_S = confmatrix[1][1]/(confmatrix[1][0] + confmatrix[1][1])
+# background efficiency = number of background events identified as signal divided by total number of background events
+eff_B = confmatrix[0][1]/(confmatrix[0][0] + confmatrix[0][1])
 
 print('Luminosity=', Lumi)
 
@@ -100,13 +102,13 @@ print('Initial significance=', Sweight/np.sqrt(Bweight))
 print('-')
 # print analysis efficiencies
 print('Signal efficiency=', eff_S)
-print('Background Efficiency=', 1-eff_B)
+print('Background Efficiency=', eff_B)
 print('Final signal cross section=', sig_factors*np.sum(wS)/initial_S*eff_S)
-print('Final background cross section=', bkg_factors*np.sum(wB)/initial_B*(1-eff_B))
-print('Final significance=', Sweight*eff_S/np.sqrt(Bweight*(1-eff_B)))
+print('Final background cross section=', bkg_factors*np.sum(wB)/initial_B*eff_B)
+print('Final significance=', Sweight*eff_S/np.sqrt(Bweight*eff_B))
 print('-')
 # calculate 95% C.L. limit on expected number of events: 
-S2sigma = np.sqrt(Bweight*(1-eff_B)) * 2
+S2sigma = np.sqrt(Bweight*eff_B) * 2
 print('95% C.L. limit on number of signal events=', S2sigma)
 print('95% C.L. limit on signal cross section in given final state=', S2sigma/Lumi, 'fb')
 
